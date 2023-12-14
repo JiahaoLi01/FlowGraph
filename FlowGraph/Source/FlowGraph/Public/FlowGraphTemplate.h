@@ -35,11 +35,6 @@ public:
 
 public:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bTickable{true};
-
-public:
-
 	// Template methods.
 	UFUNCTION(BlueprintCallable)
 	UFlowGraphInstance* SpawnInstance(UObject* Outer);

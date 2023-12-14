@@ -10,7 +10,7 @@ FName FFlowGraphAssetEditorToolkit::GetToolkitFName() const
 
 FText FFlowGraphAssetEditorToolkit::GetBaseToolkitName() const
 {
-	return NSLOCTEXT("DarkMountainEditor", "FlowGraphEditorToolkit", "流图编辑器");
+	return NSLOCTEXT("FlowGraphEditor", "FlowGraphEditorToolkit", "流图编辑器");
 }
 
 FString FFlowGraphAssetEditorToolkit::GetWorldCentricTabPrefix() const
@@ -29,11 +29,11 @@ void FFlowGraphAssetEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabMana
 
 	InTabManager->RegisterTabSpawner(DetailViewPanelTabName, FOnSpawnTab::CreateRaw(this, &FFlowGraphAssetEditorToolkit::SpawnDetailViewTab))
 		.SetGroup(WorkspaceMenuCategory.ToSharedRef())
-		.SetDisplayName(NSLOCTEXT("DarkMountainEditor", "FlowGraphEditorToolkitDetailTab", "细节页签"))
+		.SetDisplayName(NSLOCTEXT("FlowGraphEditor", "FlowGraphEditorToolkitDetailTab", "细节页签"))
 		.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Toolbar.Details"));
 	InTabManager->RegisterTabSpawner(GraphEditorTabName, FOnSpawnTab::CreateRaw(this, &FFlowGraphAssetEditorToolkit::SpawnGraphEditorTab))
 		.SetGroup(WorkspaceMenuCategory.ToSharedRef())
-		.SetDisplayName(NSLOCTEXT("DarkMountainEditor", "FlowGraphEditorGraphEditorTab", "图编辑页签"))
+		.SetDisplayName(NSLOCTEXT("FlowGraphEditor", "FlowGraphEditorGraphEditorTab", "图编辑页签"))
 		.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "GraphEditor.EventGraph_16x"));
 
 	WorkspaceMenuCategory = InTabManager->AddLocalWorkspaceMenuCategory(INVTEXT("FlowGraphEditorToolkitMenuCategory"));
@@ -87,7 +87,7 @@ TSharedRef<SDockTab> FFlowGraphAssetEditorToolkit::SpawnGraphEditorTab(const FSp
 	}
 
 	FGraphAppearanceInfo GraphAppearanceInfo;
-	GraphAppearanceInfo.CornerText = NSLOCTEXT("DarkMountainEditor", "FlowGraphEditorCornerText", "流图");
+	GraphAppearanceInfo.CornerText = NSLOCTEXT("FlowGraphEditor", "FlowGraphEditorCornerText", "流图");
 
 	SGraphEditor::FGraphEditorEvents InEvents;
 	InEvents.OnSelectionChanged = SGraphEditor::FOnSelectionChanged::CreateSP(this, &FFlowGraphAssetEditorToolkit::OnSelectedNodesChanged);

@@ -4,6 +4,7 @@
 #include "UObject/Object.h"
 #include "FlowGraph_Node.generated.h"
 
+class UFlowGraphInstance;
 class UFlowGraphNodeIterator;
 class UFlowGraphTemplate;
 
@@ -22,9 +23,9 @@ protected:
 	inline static const FName FlowGraphNodePinCategory{"FlowGraphNodePinCategory"};
 	inline static const FName FlowGraphNodeSubCategory{"FlowGraphNodeSubCategory"};
 
-	static FText FlowGraphTimeSequenceCategory() {return NSLOCTEXT("DarkMountainEditor", "Time-Sequence Node Category", "时序");}
-	static FText FlowGraphDebugCategory() {return NSLOCTEXT("DarkMountainEditor", "Debug Node Category", "调试");}
-	static FText FlowGraphObjectStreamingCategory() {return NSLOCTEXT("DarkMountainEditor", "Object Streaming Node Category", "对象流送");}
+	static FText FlowGraphTimeSequenceCategory() {return NSLOCTEXT("FlowGraphEditor", "Time-Sequence Node Category", "时序");}
+	static FText FlowGraphDebugCategory() {return NSLOCTEXT("FlowGraphEditor", "Debug Node Category", "调试");}
+	static FText FlowGraphObjectStreamingCategory() {return NSLOCTEXT("FlowGraphEditor", "Object Streaming Node Category", "对象流送");}
 
 public:
 
@@ -70,7 +71,8 @@ public:
 
 public:
 
-	UFlowGraphTemplate* GetFlowGraph() const;
+	UFlowGraphTemplate* GetFlowGraphTemplate() const;
+	UFlowGraphInstance* GetFlowGraphInstance() const;
 
 public:
 
@@ -97,8 +99,8 @@ public:
 
 	virtual void OnNodeIteratorOut_Implementation(UFlowGraphNodeIterator* InIterator);
 
-	UFUNCTION(BlueprintCallable)
-	void TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName);
+	UFUNCTION(BlueprintCallable, Category="Flow Graph Node")
+	void TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName) const;
 
 public:
 

@@ -1,4 +1,6 @@
 ﻿#include "FlowGraph_Node.h"
+
+#include "FlowGraphInstance.h"
 #include "FlowGraphNodeIterator.h"
 #include "FlowGraphSubsystem.h"
 #include "FlowGraph_Graph.h"
@@ -35,7 +37,7 @@ FText UFlowGraph_Node::GetTooltipText() const
 	{
 		return BlueprintNodeTooltip;
 	}
-	return NSLOCTEXT("DarkMountainEditor", "FlowGraphBaseNodeTooltip", "流图基类节点，用于基类，理论上讲不可创建");
+	return NSLOCTEXT("FlowGraphEditor", "FlowGraphBaseNodeTooltip", "流图基类节点，用于基类，理论上讲不可创建");
 }
 
 FText UFlowGraph_Node::GetNodeDisplayName() const
@@ -44,7 +46,7 @@ FText UFlowGraph_Node::GetNodeDisplayName() const
 	{
 		return BlueprintNodeTitle;
 	}
-	return NSLOCTEXT("DarkMountainEditor", "FlowGraphBaseNodeTitle", "流图基类节点");
+	return NSLOCTEXT("FlowGraphEditor", "FlowGraphBaseNodeTitle", "流图基类节点");
 }
 
 FText UFlowGraph_Node::GetNodeCategory() const
@@ -53,7 +55,7 @@ FText UFlowGraph_Node::GetNodeCategory() const
 	{
 		return BlueprintNodeCategory;
 	}
-	return NSLOCTEXT("DarkMountainEditor", "FlowGraphBaseNodeCategory", "创建新节点|测试节点");
+	return NSLOCTEXT("FlowGraphEditor", "FlowGraphBaseNodeCategory", "创建新节点|测试节点");
 }
 
 void UFlowGraph_Node::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -63,9 +65,12 @@ void UFlowGraph_Node::PostEditChangeProperty(FPropertyChangedEvent& PropertyChan
 	if (PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, Inputs)
 		|| PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(ThisClass, Outputs))
 	{
-		Pins.Empty();
-		UFlowGraph_Node::AllocateDefaultPins();
-		GetGraph()->NotifyNodeChanged(this);
+		if (GetGraph() != nullptr)
+		{
+			Pins.Empty();
+			UFlowGraph_Node::AllocateDefaultPins();
+			GetGraph()->NotifyNodeChanged(this);
+		}
 	}
 }
 
@@ -75,11 +80,20 @@ FText UFlowGraph_Node::GetNodeTitle(ENodeTitleType::Type TitleType) const
 }
 #endif
 
-UFlowGraphTemplate* UFlowGraph_Node::GetFlowGraph() const
+UFlowGraphTemplate* UFlowGraph_Node::GetFlowGraphTemplate() const
 {
 	if (const UFlowGraph_Graph* Graph = Cast<UFlowGraph_Graph>(GetGraph()); Graph != nullptr)
 	{
 		return Graph->GetFlowGraphTemplate();
+	}
+	return nullptr;
+}
+
+UFlowGraphInstance* UFlowGraph_Node::GetFlowGraphInstance() const
+{
+	if (const UFlowGraph_Graph* Graph = Cast<UFlowGraph_Graph>(GetGraph()); Graph != nullptr)
+	{
+		return Graph->GetFlowGraphInstance();
 	}
 	return nullptr;
 }
@@ -96,15 +110,15 @@ bool UFlowGraph_Node::MatchTickCondition_Implementation()
 
 void UFlowGraph_Node::OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator)
 {
-	UE_LOG(LogFlowGraph, Log, TEXT("A iterator is out from node %s"), *GetName());
+	UE_LOG(LogFlowGraph, Log, TEXT("A iterator comes to node %s"), *GetName());
 }
 
 void UFlowGraph_Node::OnNodeIteratorOut_Implementation(UFlowGraphNodeIterator* InIterator)
 {
-	UE_LOG(LogFlowGraph, Log, TEXT("A iterator comes to the node %s"), *GetName());
+	UE_LOG(LogFlowGraph, Log, TEXT("A iterator comes out from node %s"), *GetName());
 }
 
-void UFlowGraph_Node::TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName)
+void UFlowGraph_Node::TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName) const
 {
 	if (UEdGraphPin* TargetPin = FindPin(InPinName, EGPD_Output))
 	{
@@ -113,14 +127,16 @@ void UFlowGraph_Node::TriggerOutput(UFlowGraphNodeIterator* Iterator, const FNam
 			Iterator->IteratorTo(nullptr);
 		}
 		
-		if (TargetPin->LinkedTo.Num() == 1)
+		if (TargetPin->LinkedTo.Num() >= 1)
 		{
 			UFlowGraph_Node* FlowGraphNode = Cast<UFlowGraph_Node>(TargetPin->LinkedTo[0]->GetOwningNode());
 			Iterator->IteratorTo(FlowGraphNode);
-		}
-		else
-		{
-			// TODO : Logic when it has multiple links.
+			
+			for (int i = 1; i < TargetPin->LinkedTo.Num(); ++i)
+			{
+				UFlowGraph_Node* TargetNode = Cast<UFlowGraph_Node>(TargetPin->LinkedTo[i]->GetOwningNode());
+				GetFlowGraphInstance()->CreateAndRegisterNodeIterator(TargetNode, UFlowGraphNodeIterator::StaticClass());
+			}
 		}
 	}
 }

@@ -9,7 +9,15 @@ UFlowGraph_Graph::UFlowGraph_Graph()
 
 UFlowGraphTemplate* UFlowGraph_Graph::GetFlowGraphTemplate() const
 {
-	return Cast<UFlowGraphTemplate>(GetOuter());
+	if (UFlowGraphTemplate* Template = Cast<UFlowGraphTemplate>(GetOuter()))
+	{
+		return Template;
+	}
+	if (const UFlowGraphInstance* Instance = Cast<UFlowGraphInstance>(GetOuter()))
+	{
+		return Instance->Template;
+	}
+	return nullptr;
 }
 
 UFlowGraphInstance* UFlowGraph_Graph::GetFlowGraphInstance() const

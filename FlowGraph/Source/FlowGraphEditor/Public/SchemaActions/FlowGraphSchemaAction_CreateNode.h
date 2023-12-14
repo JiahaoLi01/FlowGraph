@@ -2,11 +2,15 @@
 
 #include "CoreMinimal.h"
 
+class UFlowGraphSchema;
+
 class FLOWGRAPHEDITOR_API FFlowGraphSchemaAction_CreateNode final : public FEdGraphSchemaAction_NewNode
 {
 public:
 
-	UClass* NodeClass;
+	TObjectPtr<UClass> NodeClass;
+
+	TObjectPtr<UFlowGraphSchema> Schema;
 	
 public:
 
@@ -17,7 +21,8 @@ public:
 	0
 	), NodeClass(nullptr){}
 
-	void SetNodeClass(UClass* InNodeClass);
+	void SetNodeClass(const UClass* InNodeClass);
+	void SetSchema(const UFlowGraphSchema* InSchema);
 
 	virtual UEdGraphNode* PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2D Location, bool bSelectNewNode) override;
 };

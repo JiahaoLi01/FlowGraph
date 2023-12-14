@@ -74,10 +74,6 @@ void UFlowGraphInstance::RemoveAllIterator()
 
 void UFlowGraphInstance::TickIterators(const float DeltaTime)
 {
-	if (!Template->bTickable)
-	{
-		return;
-	}
 	for (UFlowGraphNodeIterator* Iterator : NodeIterators)
 	{
 		Iterator->TickNode(DeltaTime);
@@ -100,7 +96,6 @@ void UFlowGraphInstance::OnRegisterToSubsystem()
 
 void UFlowGraphInstance::OnUnregisterFromSubsystem()
 {
-	Template->bTickable = false;
 	bIsDirty = true;
 	UE_LOG(LogFlowGraph, Log, TEXT("flow graph %s unregisted"), *GraphId.ToString())
 }

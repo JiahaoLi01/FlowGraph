@@ -13,6 +13,7 @@ void UFlowGraphSchema::GetGraphContextActions(FGraphContextMenuBuilder& ContextM
 	for (const auto& NodeClassIterator : NodeClasses)
 	{
 		const TSharedPtr<FFlowGraphSchemaAction_CreateNode> CreateNodeAction = MakeShareable(new FFlowGraphSchemaAction_CreateNode);
+		CreateNodeAction->SetSchema(this);
 		const UFlowGraph_Node* NodeCDO = Cast<UFlowGraph_Node>(NodeClassIterator->ClassDefaultObject);
 
 		static const FName FastCategoryMetaKey {"FastCreateCategory"};
@@ -40,7 +41,7 @@ void UFlowGraphSchema::GetContextMenuActions(UToolMenu* Menu, UGraphNodeContextM
 	static const FName FlowGraphContextMenuSection {"FlowGraphContextMenuSection"};
 	if (Context->Node)
 	{
-		FToolMenuSection& Section = Menu->AddSection(FlowGraphContextMenuSection, NSLOCTEXT("DarkMountainEditor", "NodeContextMenuSection", "节点操作菜单"));
+		FToolMenuSection& Section = Menu->AddSection(FlowGraphContextMenuSection, NSLOCTEXT("FlowGraphEditor", "NodeContextMenuSection", "节点操作菜单"));
 		Section.AddMenuEntry(FGenericCommands::Get().Copy);
 		Section.AddMenuEntry(FGenericCommands::Get().Cut);
 		Section.AddMenuEntry(FGenericCommands::Get().Paste);
@@ -48,7 +49,7 @@ void UFlowGraphSchema::GetContextMenuActions(UToolMenu* Menu, UGraphNodeContextM
 	}
 	if (Context->Pin)
 	{
-		FToolMenuSection& Section = Menu->AddSection(FlowGraphContextMenuSection, NSLOCTEXT("DarkMountainEditor", "PinMenuSection", "引脚菜单"));
+		FToolMenuSection& Section = Menu->AddSection(FlowGraphContextMenuSection, NSLOCTEXT("FlowGraphEditor", "PinMenuSection", "引脚菜单"));
 		Section.AddMenuEntry(FGenericCommands::Get().Delete);
 	}
 	Super::GetContextMenuActions(Menu, Context);
@@ -65,4 +66,9 @@ const FPinConnectionResponse UFlowGraphSchema::CanCreateConnection(const UEdGrap
 		return FPinConnectionResponse(CONNECT_RESPONSE_MAKE, TEXT("OK!"));
 	}
 	return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Cannot connect the output pin to the input pin"));
+}
+
+bool UFlowGraphSchema::TryCreateConnection(UEdGraphPin* A, UEdGraphPin* B) const
+{
+	return Super::TryCreateConnection(A, B);
 }

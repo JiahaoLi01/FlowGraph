@@ -38,7 +38,8 @@ struct FFlowGraphSpawnHandle
 {
 	GENERATED_BODY()
 
-	FFlowGraphSpawnHandle(UFlowGraphInstance* InSpawnInstance) : SpawnedInstance(InSpawnInstance){}
+	FFlowGraphSpawnHandle(){}
+	explicit FFlowGraphSpawnHandle(UFlowGraphInstance* InSpawnInstance) : SpawnedInstance(InSpawnInstance){}
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UFlowGraphInstance> SpawnedInstance;
