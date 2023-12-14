@@ -4,12 +4,45 @@
 #include "UObject/Object.h"
 #include "FlowGraphSubsystem.generated.h"
 
+class UFlowGraphInstance;
 DECLARE_STATS_GROUP(TEXT("FlowGraph"), STATGROUP_FlowGraph, STATCAT_Advanced)
 
 class UFlowGraphTemplate;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFlowGraphDelegate_Signature, UFlowGraphTemplate*, FlowGraph);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFlowGraphDelegate_Signature, UFlowGraphInstance*, FlowGraph);
 DECLARE_LOG_CATEGORY_EXTERN(LogFlowGraph, Log, All);
+
+USTRUCT(BlueprintType)
+struct FWarpedFlowGraphInstanceArray
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<TObjectPtr<UFlowGraphInstance>> InstanceArray;
+
+	TArray<TObjectPtr<UFlowGraphInstance>> operator()()
+	{
+		return InstanceArray;
+	}
+
+	explicit operator TArray<TObjectPtr<UFlowGraphInstance>>() const
+	{
+		return InstanceArray;
+	}
+};
+
+USTRUCT(BlueprintType)
+struct FFlowGraphSpawnHandle
+{
+	GENERATED_BODY()
+
+	FFlowGraphSpawnHandle(UFlowGraphInstance* InSpawnInstance) : SpawnedInstance(InSpawnInstance){}
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFlowGraphInstance> SpawnedInstance;
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class FLOWGRAPH_API UFlowGraphSubsystem : public UWorldSubsystem, public FTickableGameObject
@@ -21,18 +54,29 @@ class FLOWGRAPH_API UFlowGraphSubsystem : public UWorldSubsystem, public FTickab
 public:
 
 	UPROPERTY()
-	TArray<TObjectPtr<UFlowGraphTemplate>> ActiveFlowGraph;
+	TArray<TObjectPtr<UFlowGraphInstance>> RegisterFlowGraph;
+
+	UPROPERTY()
+	TMap<UFlowGraphTemplate*, FWarpedFlowGraphInstanceArray> RegisterFlowGraphMap;
 
 public:
 
 	UFUNCTION(BlueprintCallable)
-	void RegisterFlowGraph(UFlowGraphTemplate* InFlowGraph);
+	FFlowGraphSpawnHandle RegisterFlowGraphFromTemplate(UFlowGraphTemplate* InFlowGraph);
 
 	UFUNCTION(BlueprintCallable, meta=(ExpandBoolAsExecs="ReturnValue"))
-	bool UnregisterFlowGraph(UFlowGraphTemplate* InFlowGraph);
+	bool UnregisterFlowGraph(UFlowGraphInstance* InFlowGraph);
 
 	UFUNCTION(BlueprintCallable, meta=(ExpandBoolAsExecs="ReturnValue"))
 	bool UnregisterFlowGraphById(const FName& InFlowGraphId);
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	TArray<UFlowGraphInstance*> GetInstancesFromTemplate(UFlowGraphTemplate* QueryTemplate);
+
+	UFUNCTION(BlueprintCallable)
+	UFlowGraphInstance* GetFirstInstanceFromTemplate(UFlowGraphTemplate* QueryTemplate);
 
 	/**
 	 * @brief It is called after the flow graph object is added to the active flow graph list, and after calling the method
@@ -51,6 +95,7 @@ public:
 
 public:
 
+	/** Begin FTickableGameObjectInterface */
 	virtual void Tick(float DeltaTime) override;
 	FORCEINLINE virtual bool IsTickable() const override {return !IsTemplate();}
 	FORCEINLINE virtual bool IsTickableInEditor() const override {return false;}
@@ -59,6 +104,7 @@ public:
 	FORCEINLINE virtual TStatId GetStatId() const override {RETURN_QUICK_DECLARE_CYCLE_STAT(UFlowGraphSubsystem, STATGROUP_FlowGraph)}
 
 	virtual bool DoesSupportWorldType(const EWorldType::Type WorldType) const override;
+	/** End FTickableGameObjectInterface */
 
 protected:
 

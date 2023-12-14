@@ -79,7 +79,7 @@ UFlowGraphTemplate* UFlowGraph_Node::GetFlowGraph() const
 {
 	if (const UFlowGraph_Graph* Graph = Cast<UFlowGraph_Graph>(GetGraph()); Graph != nullptr)
 	{
-		return Graph->GetFlowGraph();
+		return Graph->GetFlowGraphTemplate();
 	}
 	return nullptr;
 }

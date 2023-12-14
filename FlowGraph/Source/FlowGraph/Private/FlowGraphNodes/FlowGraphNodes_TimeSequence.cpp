@@ -1,4 +1,5 @@
 ﻿#include "FlowGraphNodes/FlowGraphNodes_TimeSequence.h"
+#include "FlowGraphInstance.h"
 #include "FlowGraphNodeIterator.h"
 #include "FlowGraphSubsystem.h"
 #include "FlowGraph_Graph.h"
@@ -75,8 +76,8 @@ void UFlowGraphNode_End::OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator*
 	InIterator->IteratorTo(nullptr);
 	const UFlowGraph_Graph* OwnerGraph = Cast<UFlowGraph_Graph>(GetGraph());
 
-	if (UFlowGraphSubsystem* FlowGraphSubsystem = OwnerGraph->GetFlowGraph()->FlowGraphSubsystem.Get())
+	if (UFlowGraphSubsystem* FlowGraphSubsystem = OwnerGraph->GetFlowGraphInstance()->FlowGraphSubsystem.Get())
 	{
-		FlowGraphSubsystem->UnregisterFlowGraph(OwnerGraph->GetFlowGraph());
+		FlowGraphSubsystem->UnregisterFlowGraph(OwnerGraph->GetFlowGraphInstance());
 	}
 }

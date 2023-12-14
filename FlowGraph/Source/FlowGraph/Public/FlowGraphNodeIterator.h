@@ -4,6 +4,7 @@
 #include "UObject/Object.h"
 #include "FlowGraphNodeIterator.generated.h"
 
+class UFlowGraphInstance;
 class UFlowGraph_Node;
 class UFlowGraphTemplate;
 
@@ -15,7 +16,7 @@ class FLOWGRAPH_API UFlowGraphNodeIterator : public UObject
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Iterator")
-	TWeakObjectPtr<UFlowGraphTemplate> OwnerGraph;
+	TWeakObjectPtr<UFlowGraphInstance> OwnerGraph;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Iterator")
 	TWeakObjectPtr<UFlowGraph_Node> CurrentNode;

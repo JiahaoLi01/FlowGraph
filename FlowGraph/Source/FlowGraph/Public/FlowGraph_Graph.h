@@ -22,5 +22,7 @@ public:
 
 	UFlowGraph_Graph();
 
-	UFlowGraphTemplate* GetFlowGraph() const;
+	UFlowGraphTemplate* GetFlowGraphTemplate() const;
+
+	UFlowGraphInstance* GetFlowGraphInstance() const;
 };

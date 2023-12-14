@@ -1,5 +1,6 @@
 ﻿#include "FlowGraphSubsystem.h"
 
+#include "FlowGraphInstance.h"
 #include "FlowGraphTemplate.h"
 
 DECLARE_CYCLE_STAT(TEXT("FlowGraphSubsystemTick"), STAT_FlowGraphSubsystemTick, STATGROUP_FlowGraph)
@@ -13,22 +14,25 @@ bool UFlowGraphSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return DerivedClasses.Num() == 0;
 }
 
-void UFlowGraphSubsystem::RegisterFlowGraph(UFlowGraphTemplate* InFlowGraph)
+FFlowGraphSpawnHandle UFlowGraphSubsystem::RegisterFlowGraphFromTemplate(UFlowGraphTemplate* InFlowGraph)
 {
-	UFlowGraphTemplate* CopiedGraph = DuplicateObject(InFlowGraph, this);
-	ActiveFlowGraph.Add(CopiedGraph);
-	CopiedGraph->OnRegisterToSubsystem();
-	CopiedGraph->FlowGraphSubsystem = this;
+	UFlowGraphInstance* Instance = InFlowGraph->SpawnInstance(this);
+	RegisterFlowGraph.Add(Instance);
+	Instance->OnRegisterToSubsystem();
+	Instance->FlowGraphSubsystem = this;
 
 	if (OnFlowGraphRegister.IsBound())
 	{
-		OnFlowGraphRegister.Broadcast(CopiedGraph);
+		OnFlowGraphRegister.Broadcast(Instance);
 	}
+
+	const FFlowGraphSpawnHandle Handle(Instance);
+	return Handle;
 }
 
-bool UFlowGraphSubsystem::UnregisterFlowGraph(UFlowGraphTemplate* InFlowGraph)
+bool UFlowGraphSubsystem::UnregisterFlowGraph(UFlowGraphInstance* InFlowGraph)
 {
-	if (ActiveFlowGraph.Contains(InFlowGraph))
+	if (RegisterFlowGraph.Contains(InFlowGraph))
 	{
 		if (OnFlowGraphUnregister.IsBound())
 		{
@@ -45,17 +49,17 @@ bool UFlowGraphSubsystem::UnregisterFlowGraph(UFlowGraphTemplate* InFlowGraph)
 
 bool UFlowGraphSubsystem::UnregisterFlowGraphById(const FName& InFlowGraphId)
 {
-	for (UPTRINT i = 0; i < ActiveFlowGraph.Num(); ++i)
+	for (UPTRINT i = 0; i < RegisterFlowGraph.Num(); ++i)
 	{
-		if (ActiveFlowGraph[i]->GraphId == InFlowGraphId)
+		if (RegisterFlowGraph[i]->GraphId == InFlowGraphId)
 		{
 			if (OnFlowGraphUnregister.IsBound())
 			{
-				OnFlowGraphUnregister.Broadcast(ActiveFlowGraph[i]);
+				OnFlowGraphUnregister.Broadcast(RegisterFlowGraph[i]);
 			}
 
-			ActiveFlowGraph[i]->OnUnregisterFromSubsystem();
-			ActiveFlowGraph[i]->bIsDirty = true;
+			RegisterFlowGraph[i]->OnUnregisterFromSubsystem();
+			RegisterFlowGraph[i]->bIsDirty = true;
 			
 			return true;
 		}
@@ -64,13 +68,31 @@ bool UFlowGraphSubsystem::UnregisterFlowGraphById(const FName& InFlowGraphId)
 	return false;
 }
 
+TArray<UFlowGraphInstance*> UFlowGraphSubsystem::GetInstancesFromTemplate(UFlowGraphTemplate* QueryTemplate)
+{
+	if (RegisterFlowGraphMap.Contains(QueryTemplate) && RegisterFlowGraphMap[QueryTemplate]().Num() > 0)
+	{
+		return RegisterFlowGraphMap[QueryTemplate]();
+	}
+	return {};
+}
+
+UFlowGraphInstance* UFlowGraphSubsystem::GetFirstInstanceFromTemplate(UFlowGraphTemplate* QueryTemplate)
+{
+	if (RegisterFlowGraphMap.Contains(QueryTemplate) && RegisterFlowGraphMap[QueryTemplate]().Num() > 0)
+	{
+		return RegisterFlowGraphMap[QueryTemplate]()[0];
+	}
+	return nullptr;
+}
+
 void UFlowGraphSubsystem::Tick(float DeltaTime)
 {
 	SCOPE_CYCLE_COUNTER(STAT_FlowGraphSubsystemTick)
 
 	TickEachActiveFlowGraph(DeltaTime);
 
-	ActiveFlowGraph.RemoveAll([](const TObjectPtr<UFlowGraphTemplate> FlowGraph)
+	RegisterFlowGraph.RemoveAll([](const TObjectPtr<UFlowGraphInstance> FlowGraph)
 	{
 		return FlowGraph->bIsDirty;
 	});
@@ -83,7 +105,7 @@ bool UFlowGraphSubsystem::DoesSupportWorldType(const EWorldType::Type WorldType)
 
 void UFlowGraphSubsystem::TickEachActiveFlowGraph(const float DeltaTime)
 {
-	for (UFlowGraphTemplate* FlowGraph : ActiveFlowGraph)
+	for (UFlowGraphInstance* FlowGraph : RegisterFlowGraph)
 	{
 		FlowGraph->Tick(DeltaTime);
 	}
