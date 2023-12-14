@@ -25,6 +25,7 @@ public class FlowGraphEditor : ModuleRules
                 "AssetDefinition",
                 "ToolMenus",
                 "AssetTools",
+                "Projects"
             }
         );
     }

@@ -22,7 +22,7 @@
 		},
 		{
 			"Name": "FlowGraphEditor",
-			"Type": "Editor",
+			"Type": "UncookedOnly",
 			"LoadingPhase": "Default"
 		}
 	]

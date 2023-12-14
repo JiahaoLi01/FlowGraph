@@ -1,6 +1,7 @@
 ﻿#include "AssetDefinition_FlowGraph.h"
 #include "FlowGraphTemplate.h"
 #include "FlowGraphAssetToolkit.h"
+#include "Interfaces/IPluginManager.h"
 
 EAssetCommandResult UAssetDefinition_FlowGraph::OpenAssets(const FAssetOpenArgs& OpenArgs) const
 {
@@ -22,9 +23,10 @@ EAssetCommandResult UAssetDefinition_FlowGraph::OpenAssets(const FAssetOpenArgs&
 const FSlateBrush* UAssetDefinition_FlowGraph::GetThumbnailBrush(const FAssetData& InAssetData,
 	const FName InClassName) const
 {
+	const FString PluginBaseDir = IPluginManager::Get().FindPlugin("FlowGraph")->GetBaseDir();
 	const static  FSlateDynamicImageBrush* Icon =
 		new FSlateDynamicImageBrush(
-			*(FPaths::ProjectPluginsDir() / "FlowGraph" / "Resources" / "FlowGraphAssetIcon.png"),
+			*(FPaths::Combine(PluginBaseDir) / "Resources" / "FlowGraphAssetIcon.png"),
 			FVector2D(256, 256));
 	return Icon;
 }
