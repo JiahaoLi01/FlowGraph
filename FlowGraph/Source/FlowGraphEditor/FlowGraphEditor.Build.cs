@@ -16,6 +16,7 @@ public class FlowGraphEditor : ModuleRules
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
+                "Core",
                 "CoreUObject",
                 "Engine",
                 "UnrealEd",
@@ -25,7 +26,9 @@ public class FlowGraphEditor : ModuleRules
                 "AssetDefinition",
                 "ToolMenus",
                 "AssetTools",
-                "Projects"
+                "Projects",
+                "ApplicationCore",
+                "GraphEditor"
             }
         );
     }

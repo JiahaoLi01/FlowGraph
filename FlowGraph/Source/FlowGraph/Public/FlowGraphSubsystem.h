@@ -5,9 +5,9 @@
 #include "FlowGraphSubsystem.generated.h"
 
 class UFlowGraphInstance;
-DECLARE_STATS_GROUP(TEXT("FlowGraph"), STATGROUP_FlowGraph, STATCAT_Advanced)
-
 class UFlowGraphTemplate;
+
+DECLARE_STATS_GROUP(TEXT("FlowGraph"), STATGROUP_FlowGraph, STATCAT_Advanced)
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFlowGraphDelegate_Signature, UFlowGraphInstance*, FlowGraph);
 DECLARE_LOG_CATEGORY_EXTERN(LogFlowGraph, Log, All);

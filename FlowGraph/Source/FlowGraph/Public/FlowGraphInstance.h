@@ -31,6 +31,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	bool bIsDirty{false};
 
+	/**
+	 * @property bTickIsPause : when it is set to true, the subsystem will ignore its tick function, so that all tick logic
+	 * will be paused, the timer for example. However, nodes that are driven by event will not be influenced.
+	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	bool bTickIsPause{false};
 

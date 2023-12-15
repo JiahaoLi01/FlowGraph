@@ -35,7 +35,15 @@ private:
 
 	void CreateGraphEditorUICommands();
 
-	void DeleteSelectedNodes() const;
+	void DeleteSelectedNodes();
 
-	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection);
+	void CopySelectedNodes();
+
+	void CutSelectedNodes();
+
+	void DeleteSelectedDuplicatableNodes();
+
+	void PasteNodes();
+
+	void OnSelectedNodesChanged(const TSet<UObject*>& NewSelection) const;
 };
