@@ -33,6 +33,11 @@ void UFlowGraphInstance::Tick(const float DeltaTime)
 	}
 	TickIterators(DeltaTime);
 	DestroyDirtyIterators();
+
+	if (Template->bUnregisterIfNoIterator)
+	{
+		UnregisterSelfIfNoIterators();
+	}
 }
 
 void UFlowGraphInstance::CreateAndRegisterNodeIterator(UFlowGraph_Node* InStartNode, const TSubclassOf<UFlowGraphNodeIterator>& IteratorClass)
@@ -72,6 +77,21 @@ void UFlowGraphInstance::RemoveAllIterator()
 	NodeIterators.Empty();
 }
 
+void UFlowGraphInstance::SetPause(const bool NewState)
+{
+	SetPauseWithoutDelegateBroadcast(NewState);
+	
+	if (NewState && FlowGraphSubsystem->OnFlowGraphPaused.IsBound())
+	{
+		FlowGraphSubsystem->OnFlowGraphPaused.Broadcast(this);
+	}
+	else if (!NewState && FlowGraphSubsystem->OnFlowGraphContinue.IsBound())
+	{
+		FlowGraphSubsystem->OnFlowGraphContinue.Broadcast(this);
+	}
+	
+}
+
 void UFlowGraphInstance::TickIterators(const float DeltaTime)
 {
 	for (UFlowGraphNodeIterator* Iterator : NodeIterators)
@@ -88,6 +108,15 @@ void UFlowGraphInstance::DestroyDirtyIterators()
 		return NodeIterator->bMarkDirty;
 	});
 }
+
+void UFlowGraphInstance::UnregisterSelfIfNoIterators()
+{
+	if (NodeIterators.Num() == 0)
+	{
+		FlowGraphSubsystem->UnregisterFlowGraph(this);
+	}
+}
+
 
 void UFlowGraphInstance::OnRegisterToSubsystem()
 {

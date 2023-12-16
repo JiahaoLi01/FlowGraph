@@ -17,6 +17,8 @@ class FLOWGRAPH_API UFlowGraphInstance : public UObject
 {
 	GENERATED_BODY()
 
+	friend class UFlowGraphSubsystem;
+
 public:
 
 	UPROPERTY()
@@ -28,6 +30,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	TArray<TObjectPtr<UFlowGraphNodeIterator>> NodeIterators;
 
+protected:
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	bool bIsDirty{false};
 
@@ -37,6 +41,8 @@ public:
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(AllowPrivateAccess=true))
 	bool bTickIsPause{false};
+
+public:
 
 	/**
 	 * @property FlowGraphSubsystem : A short-cut method to get the subsystem after the flow graph is register.
@@ -73,9 +79,6 @@ public:
 
 	void Tick(const float DeltaTime);
 
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetTickable(const bool NewState) {bTickIsPause = NewState;}
-
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -90,6 +93,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveAllIterator();
 
+	/**
+	 * @function SetPauseWithoutDelegateBroadcast : This method will not invoke the multicast delegate in the subsystem.
+	 * @param NewState 
+	 */
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetPauseWithoutDelegateBroadcast(const bool NewState) {bTickIsPause = NewState;}
+
+	UFUNCTION(BlueprintCallable)
+	void SetPause(const bool NewState);
+
 private:
 
 	UFUNCTION()
@@ -97,6 +110,8 @@ private:
 
 	UFUNCTION()
 	void DestroyDirtyIterators();
+
+	void UnregisterSelfIfNoIterators();
 
 public:
 

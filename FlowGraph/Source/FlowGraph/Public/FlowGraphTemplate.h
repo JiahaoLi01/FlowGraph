@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UBlackboardData> BlackboardData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bUnregisterIfNoIterator{true};
+
 public:
 
 	// Template methods.
