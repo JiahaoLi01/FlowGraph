@@ -26,6 +26,16 @@ FFlowGraphSpawnHandle UFlowGraphSubsystem::RegisterFlowGraphFromTemplate(UFlowGr
 		OnFlowGraphRegister.Broadcast(Instance);
 	}
 
+	if (RegisterFlowGraphMap.Contains(InFlowGraph))
+	{
+		RegisterFlowGraphMap[InFlowGraph].InstanceArray.Add(Instance);
+	}
+	else
+	{
+		RegisterFlowGraphMap.Add(InFlowGraph);
+		RegisterFlowGraphMap[InFlowGraph].InstanceArray.Add(Instance);
+	}
+
 	const FFlowGraphSpawnHandle Handle(Instance);
 	return Handle;
 }
@@ -68,6 +78,50 @@ bool UFlowGraphSubsystem::UnregisterFlowGraphById(const FName& InFlowGraphId)
 	return false;
 }
 
+void UFlowGraphSubsystem::PauseFlowGraphInstance(UFlowGraphInstance* InInstance) const
+{
+	InInstance->bTickIsPause = true;
+	if (OnFlowGraphPaused.IsBound())
+	{
+		OnFlowGraphPaused.Broadcast(InInstance);
+	}
+}
+
+void UFlowGraphSubsystem::PauseFlowGraphInstancesOfGivenTemplate(UFlowGraphTemplate* InTemplate)
+{
+	for (UFlowGraphInstance* Instance : RegisterFlowGraphMap[InTemplate].InstanceArray)
+	{
+		Instance->bTickIsPause = true;
+
+		if (OnFlowGraphPaused.IsBound())
+		{
+			OnFlowGraphPaused.Broadcast(Instance);
+		}
+	}
+}
+
+void UFlowGraphSubsystem::ContinueFlowGraphInstance(UFlowGraphInstance* InInstance)
+{
+	InInstance->bTickIsPause = false;
+	if (OnFlowGraphContinue.IsBound())
+	{
+		OnFlowGraphContinue.Broadcast(InInstance);
+	}
+}
+
+void UFlowGraphSubsystem::ContinueFlowGraphInstancesOfGivenTemplate(UFlowGraphTemplate* InTemplate)
+{
+	for (UFlowGraphInstance* Instance : RegisterFlowGraphMap[InTemplate].InstanceArray)
+	{
+		Instance->bTickIsPause = false;
+
+		if (OnFlowGraphContinue.IsBound())
+		{
+			OnFlowGraphContinue.Broadcast(Instance);
+		}
+	}
+}
+
 TArray<UFlowGraphInstance*> UFlowGraphSubsystem::GetInstancesFromTemplate(UFlowGraphTemplate* QueryTemplate)
 {
 	if (RegisterFlowGraphMap.Contains(QueryTemplate) && RegisterFlowGraphMap[QueryTemplate]().Num() > 0)
@@ -91,11 +145,7 @@ void UFlowGraphSubsystem::Tick(float DeltaTime)
 	SCOPE_CYCLE_COUNTER(STAT_FlowGraphSubsystemTick)
 
 	TickEachActiveFlowGraph(DeltaTime);
-
-	RegisterFlowGraph.RemoveAll([](const TObjectPtr<UFlowGraphInstance> FlowGraph)
-	{
-		return FlowGraph->bIsDirty;
-	});
+	ClearDirtyFlowGraph();
 }
 
 bool UFlowGraphSubsystem::DoesSupportWorldType(const EWorldType::Type WorldType) const
@@ -109,4 +159,32 @@ void UFlowGraphSubsystem::TickEachActiveFlowGraph(const float DeltaTime)
 	{
 		FlowGraph->Tick(DeltaTime);
 	}
+}
+
+void UFlowGraphSubsystem::ClearDirtyFlowGraph()
+{
+	TArray<UFlowGraphTemplate*> EmptyInstancesMarkList{};
+	
+	for (auto Pair : RegisterFlowGraphMap)
+	{
+		auto& [InstanceArray] = Pair.Value;
+		InstanceArray.RemoveAll([](const TObjectPtr<UFlowGraphInstance> FlowGraph)
+		{
+			return FlowGraph->bIsDirty;
+		});
+		if (InstanceArray.Num() == 0)
+		{
+			EmptyInstancesMarkList.Add(Pair.Key);
+		}
+	}
+
+	for (const UFlowGraphTemplate* Template : EmptyInstancesMarkList)
+	{
+		RegisterFlowGraphMap.Remove(Template);
+	}
+	
+	RegisterFlowGraph.RemoveAll([](const TObjectPtr<UFlowGraphInstance> FlowGraph)
+	{
+		return FlowGraph->bIsDirty;
+	});
 }

@@ -8,9 +8,9 @@ class UFlowGraphInstance;
 class UFlowGraphTemplate;
 
 DECLARE_STATS_GROUP(TEXT("FlowGraph"), STATGROUP_FlowGraph, STATCAT_Advanced)
+DECLARE_LOG_CATEGORY_EXTERN(LogFlowGraph, Log, All);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFlowGraphDelegate_Signature, UFlowGraphInstance*, FlowGraph);
-DECLARE_LOG_CATEGORY_EXTERN(LogFlowGraph, Log, All);
 
 USTRUCT(BlueprintType)
 struct FWarpedFlowGraphInstanceArray
@@ -74,6 +74,20 @@ public:
 public:
 
 	UFUNCTION(BlueprintCallable)
+	void PauseFlowGraphInstance(UFlowGraphInstance* InInstance) const;
+
+	UFUNCTION(BlueprintCallable)
+	void PauseFlowGraphInstancesOfGivenTemplate(UFlowGraphTemplate* InTemplate);
+
+	UFUNCTION(BlueprintCallable)
+	void ContinueFlowGraphInstance(UFlowGraphInstance* InInstance);
+
+	UFUNCTION(BlueprintCallable)
+	void ContinueFlowGraphInstancesOfGivenTemplate(UFlowGraphTemplate* InTemplate);
+
+public:
+
+	UFUNCTION(BlueprintCallable)
 	TArray<UFlowGraphInstance*> GetInstancesFromTemplate(UFlowGraphTemplate* QueryTemplate);
 
 	UFUNCTION(BlueprintCallable)
@@ -93,6 +107,12 @@ public:
 	 */
 	UPROPERTY(BlueprintAssignable)
 	FFlowGraphDelegate_Signature OnFlowGraphUnregister;
+	
+	UPROPERTY(BlueprintAssignable)
+	FFlowGraphDelegate_Signature OnFlowGraphPaused;
+
+	UPROPERTY(BlueprintAssignable)
+	FFlowGraphDelegate_Signature OnFlowGraphContinue;
 
 public:
 
@@ -110,4 +130,6 @@ public:
 protected:
 
 	void TickEachActiveFlowGraph(const float DeltaTime);
+
+	void ClearDirtyFlowGraph();
 };
