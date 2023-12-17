@@ -71,3 +71,26 @@ public:
 
 	virtual void OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator) override;
 };
+
+UCLASS(Blueprintable, BlueprintType)
+class UFlowGraphNode_RaiseEvent : public UFlowGraph_Node
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Instanced)
+	TArray<TObjectPtr<UFlowGraphEventArgs>> EventArgs;
+
+public:
+
+#if WITH_EDITOR
+	virtual void AllocateDefaultPins() override;
+	virtual FLinearColor GetNodeTitleColor() const override;
+	virtual FText GetTooltipText() const override;
+	virtual FText GetNodeDisplayName() const override;
+	virtual FText GetNodeCategory() const override;
+#endif
+
+	virtual void OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator) override;
+};

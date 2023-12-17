@@ -9,7 +9,7 @@
 /**
  * Data-Only class.
  */
-UCLASS(Abstract, Blueprintable, BlueprintType)
+UCLASS(Abstract, Blueprintable, BlueprintType, EditInlineNew)
 class FLOWGRAPH_API UFlowGraphEventArgs : public UObject
 {
 	GENERATED_BODY()

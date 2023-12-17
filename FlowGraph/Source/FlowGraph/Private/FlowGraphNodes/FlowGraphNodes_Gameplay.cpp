@@ -153,3 +153,46 @@ void UFlowGraphNode_PrintDebugInfo::OnNodeIteratorIn_Implementation(UFlowGraphNo
 	UE_LOG(LogFlowGraph, Log, TEXT("%s"), *Content)
 	TriggerOutput(InIterator, "Out");
 }
+
+#if WITH_EDITOR
+
+void UFlowGraphNode_RaiseEvent::AllocateDefaultPins()
+{
+	Super::AllocateDefaultPins();
+	AddInputPin("In");
+	AddOutputPin("Out");
+}
+
+FLinearColor UFlowGraphNode_RaiseEvent::GetNodeTitleColor() const
+{
+	return FLinearColor::Green;
+}
+
+FText UFlowGraphNode_RaiseEvent::GetTooltipText() const
+{
+	return NSLOCTEXT("FlowGraphEditor", "Post Event Node Tooltip", "触发事件，允许自定义参数");
+}
+
+FText UFlowGraphNode_RaiseEvent::GetNodeDisplayName() const
+{
+	return NSLOCTEXT("FlowGraphEditor", "Post Event Node Title", "触发事件");
+}
+
+FText UFlowGraphNode_RaiseEvent::GetNodeCategory() const
+{
+	return FlowGraphGameplayCategory();
+}
+
+#endif
+
+void UFlowGraphNode_RaiseEvent::OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator)
+{
+	Super::OnNodeIteratorIn_Implementation(InIterator);
+
+	for (UFlowGraphEventArgs* Args : EventArgs)
+	{
+		GetFlowGraphInstance()->FlowGraphSubsystem->RaiseFlowGraphEvent(Args);
+	}
+
+	TriggerOutput(InIterator, "Out");
+}

@@ -26,6 +26,7 @@ protected:
 	static FText FlowGraphTimeSequenceCategory() {return NSLOCTEXT("FlowGraphEditor", "Time-Sequence Node Category", "时序");}
 	static FText FlowGraphDebugCategory() {return NSLOCTEXT("FlowGraphEditor", "Debug Node Category", "调试");}
 	static FText FlowGraphObjectStreamingCategory() {return NSLOCTEXT("FlowGraphEditor", "Object Streaming Node Category", "对象流送");}
+	static FText FlowGraphGameplayCategory() {return NSLOCTEXT("FlowGraphEditor", "Gameplay Category", "游戏");}
 
 public:
 
