@@ -93,6 +93,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RemoveAllIterator();
 
+	UFUNCTION(BlueprintCallable)
+	UFlowGraphNodeIterator* GetIteratorAt(UFlowGraph_Node* InNode);
+
 	/**
 	 * @function SetPauseWithoutDelegateBroadcast : This method will not invoke the multicast delegate in the subsystem.
 	 * @param NewState 

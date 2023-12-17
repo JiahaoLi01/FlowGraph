@@ -190,3 +190,15 @@ bool UFlowGraph_Node::RemoveOutputPin(const FName& InPinName)
 	GetGraph()->NotifyNodeChanged(this);
 	return true;
 }
+
+UFlowGraphInstance* UFlowGraph_Node::GetFlowGraphInstance()
+{
+	const UFlowGraph_Graph* FlowGraph_Graph = Cast<UFlowGraph_Graph>(GetGraph());
+	return FlowGraph_Graph->GetFlowGraphInstance();
+}
+
+UFlowGraphTemplate* UFlowGraph_Node::GetFlowGraphTemplate()
+{
+	const UFlowGraph_Graph* FlowGraph_Graph = Cast<UFlowGraph_Graph>(GetGraph());
+	return FlowGraph_Graph->GetFlowGraphTemplate();
+}
