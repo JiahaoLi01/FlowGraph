@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
+#include "Interface/FlowGraphEventListener.h"
 #include "UObject/Object.h"
 #include "FlowGraphSubsystem.generated.h"
 
@@ -60,6 +61,9 @@ public:
 	UPROPERTY()
 	TMap<UFlowGraphTemplate*, FWarpedFlowGraphInstanceArray> RegisterFlowGraphMap;
 
+	UPROPERTY()
+	TArray<IFlowGraphEventListener*> FlowGraphEventListeners;
+
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -113,6 +117,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable)
 	FFlowGraphDelegate_Signature OnFlowGraphContinue;
+
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void RaiseFlowGraphEvent(UFlowGraphEventArgs* InArgs);
 
 public:
 

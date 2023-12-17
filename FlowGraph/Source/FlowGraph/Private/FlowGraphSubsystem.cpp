@@ -140,6 +140,14 @@ UFlowGraphInstance* UFlowGraphSubsystem::GetFirstInstanceFromTemplate(UFlowGraph
 	return nullptr;
 }
 
+void UFlowGraphSubsystem::RaiseFlowGraphEvent(UFlowGraphEventArgs* InArgs)
+{
+	for (auto InterfaceIterator = FlowGraphEventListeners.CreateIterator(); InterfaceIterator; ++InterfaceIterator)
+	{
+		(*InterfaceIterator)->HandleFlowGraphEventArgs(InArgs);
+	}
+}
+
 void UFlowGraphSubsystem::Tick(float DeltaTime)
 {
 	SCOPE_CYCLE_COUNTER(STAT_FlowGraphSubsystemTick)

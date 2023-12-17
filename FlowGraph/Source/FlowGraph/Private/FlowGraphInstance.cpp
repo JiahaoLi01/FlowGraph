@@ -69,12 +69,28 @@ void UFlowGraphInstance::RemoveNodeIteratorAt(UFlowGraph_Node* InNode)
 		}
 	}
 
-	RemoveNodeIterator(IteratorToRemove);
+	if (IteratorToRemove != nullptr)
+	{
+		RemoveNodeIterator(IteratorToRemove);
+	}
 }
 
 void UFlowGraphInstance::RemoveAllIterator()
 {
 	NodeIterators.Empty();
+}
+
+UFlowGraphNodeIterator* UFlowGraphInstance::GetIteratorAt(UFlowGraph_Node* InNode)
+{
+	for (UFlowGraphNodeIterator* Iterator : NodeIterators)
+	{
+		if (Iterator->CurrentNode == InNode)
+		{
+			return Iterator;
+		}
+	}
+
+	return nullptr;
 }
 
 void UFlowGraphInstance::SetPause(const bool NewState)

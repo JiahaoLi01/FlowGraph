@@ -3,10 +3,11 @@
 #include "CoreMinimal.h"
 #include "FlowGraph_Node.h"
 #include "GameplayTagContainer.h"
+#include "Interface/FlowGraphEventListener.h"
 #include "FlowGraphNodes_Gameplay.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class FLOWGRAPH_API UFlowGraphNode_ListenForGameplayTag : public UFlowGraph_Node
+class FLOWGRAPH_API UFlowGraphNode_ListenForGameplayTag : public UFlowGraph_Node, public IFlowGraphEventListener
 {
 	GENERATED_BODY()
 
@@ -25,7 +26,19 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
+	/**
+	 * @brief unlike other nodes, the FlowGraph_ListenForGameplayTag can trigger multiple output nodes at the same time, so
+	 * override this method.
+	 * @param Iterator 
+	 * @param InPinName 
+	 */
+	virtual void TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName) const override;
+
 	virtual void OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator) override;
+
+	/** Begin FlowGraphEventListener interface */
+	virtual EEventHandleState HandleFlowGraphEventArgs(UFlowGraphEventArgs* InArgs) override;
+	/** End FlowGraphEventListener interface */
 };
 
 UCLASS(Blueprintable, BlueprintType)

@@ -99,8 +99,8 @@ public:
 
 	virtual void OnNodeIteratorOut_Implementation(UFlowGraphNodeIterator* InIterator);
 
-	UFUNCTION(BlueprintCallable, Category="Flow Graph Node")
-	void TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName) const;
+	UFUNCTION(BlueprintCallable)
+	virtual void TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName) const;
 
 public:
 
@@ -118,4 +118,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool RemoveOutputPin(const FName& InPinName);
+
+	UFUNCTION(BlueprintCallable)
+	UFlowGraphInstance* GetFlowGraphInstance();
+
+	UFUNCTION(BlueprintCallable)
+	UFlowGraphTemplate* GetFlowGraphTemplate();
 };

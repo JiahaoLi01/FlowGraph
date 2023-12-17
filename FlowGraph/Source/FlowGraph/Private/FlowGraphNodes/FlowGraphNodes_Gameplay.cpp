@@ -1,6 +1,9 @@
 ﻿#include "FlowGraphNodes/FlowGraphNodes_Gameplay.h"
 
+#include "FlowGraphInstance.h"
+#include "FlowGraphNodeIterator.h"
 #include "FlowGraphSubsystem.h"
+#include "FlowGraphEventArgs/FlowGraphEventArgs_GameplayTags.h"
 
 #if WITH_EDITOR
 void UFlowGraphNode_ListenForGameplayTag::AllocateDefaultPins()
@@ -52,13 +55,64 @@ void UFlowGraphNode_ListenForGameplayTag::PostEditChangeProperty(FPropertyChange
 		}
 	}
 }
+
+void UFlowGraphNode_ListenForGameplayTag::TriggerOutput(UFlowGraphNodeIterator* Iterator, const FName& InPinName) const
+{
+	if (UEdGraphPin* TargetPin = FindPin(InPinName, EGPD_Output))
+	{
+		if (!TargetPin->HasAnyConnections())
+		{
+			Iterator->IteratorTo(nullptr);
+		}
+
+		// Because it maybe trigger multiple output at same time, so we create iterator without deleting the iterator itself.
+		// the iterator will be deleted when all of the outputs are triggered by method
+		// UFlowGraphNode_ListenForGameplayTag::OnNodeIteratorIn_Implementation instead of here.
+		for (int i = 0; i < TargetPin->LinkedTo.Num(); ++i)
+		{
+			UFlowGraph_Node* TargetNode = Cast<UFlowGraph_Node>(TargetPin->LinkedTo[i]->GetOwningNode());
+			GetFlowGraphInstance()->CreateAndRegisterNodeIterator(TargetNode, UFlowGraphNodeIterator::StaticClass());
+		}
+	}
+}
 #endif
 
 void UFlowGraphNode_ListenForGameplayTag::OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator)
 {
 	Super::OnNodeIteratorIn_Implementation(InIterator);
+	GetFlowGraphInstance()->FlowGraphSubsystem->FlowGraphEventListeners.Add(this);
 }
 
+EEventHandleState UFlowGraphNode_ListenForGameplayTag::HandleFlowGraphEventArgs(UFlowGraphEventArgs* InArgs)
+{
+	bool bHasTriggered{false};
+	if (const UFlowGraphEventArgs_GameplayTags* Arg = Cast<UFlowGraphEventArgs_GameplayTags>(InArgs))
+	{
+		for (const FGameplayTag ListenForTag : ListenForTags)
+		{
+			if (Arg->Tags.HasTag(ListenForTag))
+			{
+				UFlowGraphNodeIterator* Iterator = GetFlowGraphInstance()->GetIteratorAt(this);
+				if (Iterator != nullptr)
+				{
+					bHasTriggered = true;
+					TriggerOutput(Iterator, ListenForTag.GetTagName());
+				}
+			}
+		}
+	}
+
+	if (bHasTriggered)
+	{
+		GetFlowGraphInstance()->RemoveNodeIteratorAt(this);
+		GetFlowGraphInstance()->FlowGraphSubsystem->FlowGraphEventListeners.Remove(this);
+		return EEventHandleState::Handled;
+	}
+	
+	return EEventHandleState::Unhandled;
+}
+
+#if WITH_EDITOR
 void UFlowGraphNode_PrintDebugInfo::AllocateDefaultPins()
 {
 	Super::AllocateDefaultPins();
@@ -86,6 +140,7 @@ FText UFlowGraphNode_PrintDebugInfo::GetNodeCategory() const
 {
 	return FlowGraphDebugCategory();
 }
+#endif
 
 void UFlowGraphNode_PrintDebugInfo::OnNodeIteratorIn_Implementation(UFlowGraphNodeIterator* InIterator)
 {
