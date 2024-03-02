@@ -58,6 +58,10 @@ public:
 	virtual FText GetNodeCategory() const;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+
+	virtual void OnNodeSelected();
+
+	virtual void OnNodeCancelSelected();
 	
 #endif
 

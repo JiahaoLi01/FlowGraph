@@ -1,4 +1,5 @@
 ﻿#include "FlowGraphNodes/FlowGraphNodes_ObjectStreaming.h"
+#include "FlowGraphSubsystem.h"
 
 #if WITH_EDITOR
 void UFlowGraphNode_EnableOrDisableActor::AllocateDefaultPins()
@@ -85,6 +86,47 @@ void UFlowGraphNode_SpawnActorAt::PostEditChangeProperty(FPropertyChangedEvent& 
 	if (PropertyChangedEvent.Property->GetName() == GET_MEMBER_NAME_CHECKED(ThisClass, ActorClassToSpawn))
 	{
 		GetGraph()->NotifyNodeChanged(this);
+		OnNodeCancelSelected();
+		OnNodeSelected();
+	}
+}
+
+void UFlowGraphNode_SpawnActorAt::OnNodeSelected()
+{
+	Super::OnNodeSelected();
+
+	if (ActorClassToSpawn != nullptr)
+	{
+		UWorld* PIEWorld = nullptr;
+		for (FWorldContext const& Context : GEngine->GetWorldContexts())
+		{
+			if (Context.WorldType == EWorldType::PIE || Context.WorldType == EWorldType::GamePreview || Context.WorldType == EWorldType::Editor)
+			{
+				PIEWorld = Context.World();
+				break;
+			}
+		}
+
+		if (PIEWorld == nullptr)
+		{
+			UE_LOG(LogFlowGraph, Warning, TEXT("Spawn Actor Node Cannot find PIE world so it world not generate preview avatar"))
+			return;
+		}
+		
+		FActorSpawnParameters ActorSpawnParameters;
+		ActorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ActorAvatar = PIEWorld->SpawnActor<AActor>(ActorClassToSpawn, SpawnTransform, ActorSpawnParameters);
+	}
+}
+
+void UFlowGraphNode_SpawnActorAt::OnNodeCancelSelected()
+{
+	Super::OnNodeCancelSelected();
+
+	if (ActorAvatar != nullptr)
+	{
+		SpawnTransform = ActorAvatar->GetActorTransform();
+		ActorAvatar->Destroy();
 	}
 }
 

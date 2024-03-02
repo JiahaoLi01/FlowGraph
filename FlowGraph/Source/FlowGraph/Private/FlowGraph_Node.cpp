@@ -74,6 +74,16 @@ void UFlowGraph_Node::PostEditChangeProperty(FPropertyChangedEvent& PropertyChan
 	}
 }
 
+void UFlowGraph_Node::OnNodeSelected()
+{
+	UE_LOG(LogFlowGraph, Log, TEXT("node %s has been selected"), *GetName())
+}
+
+void UFlowGraph_Node::OnNodeCancelSelected()
+{
+	UE_LOG(LogFlowGraph, Log, TEXT("node %s has been canceld from selecting"), *GetName())
+}
+
 FText UFlowGraph_Node::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	return GetNodeDisplayName();
