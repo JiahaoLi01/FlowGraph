@@ -28,7 +28,8 @@ public class FlowGraphEditor : ModuleRules
                 "AssetTools",
                 "Projects",
                 "ApplicationCore",
-                "GraphEditor"
+                "GraphEditor",
+                "BlueprintEditorLibrary"
             }
         );
     }

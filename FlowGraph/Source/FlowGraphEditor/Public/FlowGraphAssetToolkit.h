@@ -31,7 +31,8 @@ private:
 
 	TSharedRef<SDockTab> SpawnDetailViewTab(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnGraphEditorTab(const FSpawnTabArgs& SpawnTabArgs);
-	
+
+	TSharedPtr<TSet<UObject*>> SelectedNodesLastTime{};
 
 	void CreateGraphEditorUICommands();
 

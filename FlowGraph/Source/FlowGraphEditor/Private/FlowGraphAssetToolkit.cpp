@@ -1,5 +1,4 @@
 ﻿#include "FlowGraphAssetToolkit.h"
-
 #include "EdGraphUtilities.h"
 #include "FlowGraph_Graph.h"
 #include "FlowGraphTemplate.h"
@@ -55,6 +54,7 @@ void FFlowGraphAssetEditorToolkit::UnregisterTabSpawners(const TSharedRef<FTabMa
 void FFlowGraphAssetEditorToolkit::InitializeAssetEditor(const EToolkitMode::Type Mode,
 	const TSharedPtr<IToolkitHost>& InitToolkitHost, UObject* InAssets)
 {
+	SelectedNodesLastTime = MakeShareable(new TSet<UObject*>);
 	const TSharedRef<FTabManager::FLayout> StandaloneOurAssetEditor = FTabManager::NewLayout("FlowGraphEditorLayout")->AddArea
 			(
 				FTabManager::NewPrimaryArea()->SetOrientation(EOrientation::Orient_Horizontal)
@@ -270,6 +270,30 @@ void FFlowGraphAssetEditorToolkit::OnSelectedNodesChanged(const TSet<UObject*>& 
 {
 	TArray<UObject*> Selection;
 
+	const TSet<UObject*> OldSelected = *SelectedNodesLastTime;
+	
+	TSet<UObject*> NewSelectedNodes = NewSelection.Difference(OldSelected);
+	TSet<UObject*> CancelSelectedNodes = OldSelected.Difference(NewSelection);
+
+	for (UObject* NewSelectedNode : NewSelectedNodes)
+	{
+		if (UFlowGraph_Node* Graph_Node = CastChecked<UFlowGraph_Node>(NewSelectedNode))
+		{
+			Graph_Node->OnNodeSelected();
+		}
+	}
+
+	for (UObject* CancelSelectedNode : CancelSelectedNodes)
+	{
+		if (UFlowGraph_Node* Graph_Node = CastChecked<UFlowGraph_Node>(CancelSelectedNode))
+		{
+			Graph_Node->OnNodeCancelSelected();
+		}
+	}
+
+	SelectedNodesLastTime->Empty();
+	SelectedNodesLastTime->Append(NewSelection);
+	
 	for (UObject* SelectionEntry : NewSelection)
 	{
 		Selection.Add(SelectionEntry);

@@ -40,7 +40,7 @@ public:
 };
 
 UCLASS()
-class UFlowGraphNode_SpawnActorAt : public UFlowGraph_Node
+class FLOWGRAPH_API UFlowGraphNode_SpawnActorAt : public UFlowGraph_Node
 {
 	GENERATED_BODY()
 
@@ -54,6 +54,11 @@ public:
 
 public:
 
+#if WITH_EDITORONLY_DATA
+	UPROPERTY()
+	TObjectPtr<AActor> ActorAvatar{nullptr};
+#endif
+
 #if WITH_EDITOR
 
 	virtual void AllocateDefaultPins() override;
@@ -64,6 +69,8 @@ public:
 	virtual FText GetNodeCategory() const override;
 
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void OnNodeSelected() override;
+	virtual void OnNodeCancelSelected() override;
 	
 #endif
 

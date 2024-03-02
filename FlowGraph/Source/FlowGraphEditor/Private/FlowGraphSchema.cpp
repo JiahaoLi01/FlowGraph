@@ -57,6 +57,10 @@ void UFlowGraphSchema::GetContextMenuActions(UToolMenu* Menu, UGraphNodeContextM
 
 const FPinConnectionResponse UFlowGraphSchema::CanCreateConnection(const UEdGraphPin* A, const UEdGraphPin* B) const
 {
+	if (HasConnectionBetween(A, B))
+	{
+		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Already exists a connection between the pins"));
+	}
 	if (A->Direction == B->Direction)
 	{
 		return FPinConnectionResponse(CONNECT_RESPONSE_DISALLOW, TEXT("Cannot connect pins with same direction"));
@@ -71,4 +75,16 @@ const FPinConnectionResponse UFlowGraphSchema::CanCreateConnection(const UEdGrap
 bool UFlowGraphSchema::TryCreateConnection(UEdGraphPin* A, UEdGraphPin* B) const
 {
 	return Super::TryCreateConnection(A, B);
+}
+
+bool UFlowGraphSchema::HasConnectionBetween(const UEdGraphPin* A, const UEdGraphPin* B)
+{
+	for (const UEdGraphPin* Pin : A->LinkedTo)
+	{
+		if (Pin == B)
+		{
+			return true;
+		}
+	}
+	return false;
 }
